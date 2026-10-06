@@ -1,172 +1,104 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>복권 구매 이체 안내</title>
-  <style>
-    body { 
-      text-align: center; 
-      font-family: 'Pretendard', -apple-system, sans-serif; 
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-color: #ffffff;
-    }
-    
-    /* 메인 화면 영역 */
-    #main-content {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>복권구매 계좌이체</title>
+<style>
+  :root{ --bg:#f5f6f4; --ink:#1c2321; --sub:#66706c; --line:#dfe3e0; --card:#fff; --accent:#d6336c; --btn:#0f6b4f; --btn-ink:#fff; }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#141a18; --ink:#eef2f0; --sub:#9aa5a0; --line:#2a3330; --card:#1c2422; --accent:#ff7aa8; --btn:#3fbf93; --btn-ink:#0b1512; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{ background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+    padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+    display:flex; align-items:center; justify-content:center; }
+  main{width:100%; max-width:420px}
+  h1{font-size:22px; margin:0 0 4px}
+  .sub{color:var(--sub); font-size:15px; margin:0 0 20px}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:8px 20px}
+  .row{display:flex; justify-content:space-between; gap:12px; padding:12px 0; font-size:15px}
+  .row + .row{border-top:1px solid var(--line)}
+  .row span:first-child{color:var(--sub)}
+  .acct{font-size:20px; font-weight:700}
 
-    .copy-btn { 
-      background-color: #ffd700; 
-      color: #000; 
-      padding: 40px 20px; 
-      border: none; 
-      border-radius: 20px; 
-      cursor: pointer; 
-      width: 100%; 
-      max-width: 400px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15); 
-      /* 버튼 안의 글씨들을 수직으로 중앙 정렬하는 설정 */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .copy-btn:active {
-      transform: scale(0.98); 
-    }
-
-    /* 복권 구매 (작은 글씨) */
-    .btn-small-text {
-      font-size: 20px; 
-      font-weight: 700;
-      color: #333; /* 시선 분산을 막기 위해 살짝 어두운 톤 적용 */
-      margin-bottom: 10px; /* 아래 큰 글씨와의 간격 */
-    }
-
-    /* 계좌번호 복사하기 (가장 크고 두꺼운 중심 글씨) */
-    .btn-large-text {
-      font-size: 36px; 
-      font-weight: 900;
-      color: #000;
-    }
-
-    /* 커스텀 팝업(모달) 디자인 */
-    .modal-overlay {
-      display: none; 
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6); 
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: #fff;
-      padding: 40px 20px 30px;
-      border-radius: 20px;
-      width: 80%;
-      max-width: 320px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    .modal-text {
-      font-size: 20px;
-      line-height: 1.6;
-      margin-bottom: 30px;
-      word-break: keep-all;
-    }
-    .highlight-red {
-      color: #e50000; 
-      font-weight: 900; 
-    }
-    .close-btn {
-      background-color: #333;
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      width: 100%;
-      cursor: pointer;
-    }
-    .close-btn:active {
-      background-color: #555;
-    }
-
-    /* 완료 후 나타날 종료 안내 메시지 (기본은 숨김) */
-    #done-message {
-      display: none;
-      font-size: 20px;
-      color: #888;
-      font-weight: bold;
-    }
-  </style>
+  /* 중앙 팝업 */
+  .overlay{position:fixed; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; gap:28px; padding:20px}
+  .overlay.on{display:flex}
+  .top{color:#fff; text-align:center; line-height:1.5; opacity:.8}  /* 불투명도 80% */
+  .top .t1{font-size:13px; margin:0 0 4px}
+  .top .t2{font-size:19px; font-weight:800; margin:0 0 2px; letter-spacing:.01em}
+  .top .t3{font-size:14px; margin:0}
+  .box{background:var(--card); width:100%; max-width:340px; border:2px solid var(--ink); border-radius:24px; padding:28px 22px 22px; text-align:center; animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  @media (prefers-reduced-motion:reduce){.box{animation:none}}
+  .l1{font-size:17px; font-weight:700; color:var(--ink); opacity:1; width:fit-content; max-width:100%; margin:0 auto 14px; padding:8px 14px; border:1.5px solid var(--ink); border-radius:12px; line-height:1.35; word-break:keep-all}  /* 불투명도 100%, 사각 라운드 테두리 */
+  .l2{font-size:26px; font-weight:800; color:var(--accent); line-height:1.3; margin:0 0 24px; word-break:keep-all}
+  .ok-btn{display:block; width:100%; border:0; border-radius:12px; padding:16px; font:inherit; font-size:16px; font-weight:600; cursor:pointer; background:var(--btn); color:var(--btn-ink)}
+  .ok-btn:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+</style>
 </head>
 <body>
-  
-  <!-- 처음 스캔 시 보이는 화면 (제목 없이 버튼만) -->
-  <div id="main-content">
-    <button class="copy-btn" onclick="copyAccount()">
-      <span class="btn-small-text">복권 구매</span>
-      <span class="btn-large-text">계좌번호 복사하기</span>
-    </button>
+<main>
+  <h1>복권구매 계좌이체</h1>
+  <p class="sub">아래 계좌로 이체해 주세요.</p>
+  <div class="card">
+    <div class="row"><span>은행</span><span id="bank"></span></div>
+    <div class="row"><span>예금주</span><span id="holder"></span></div>
+    <div class="row"><span>계좌번호</span><span class="acct" id="acct"></span></div>
   </div>
+</main>
 
-  <!-- 완료 후 남겨질 텍스트 -->
-  <div id="done-message">
-    창을 닫고 뱅킹 앱을 실행해 주세요.
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="l2">
+  <div class="top">
+    <p class="t2" id="topAcct"></p>
+    <p class="t3" id="topHolder"></p>
   </div>
-
-  <!-- 커스텀 팝업창 -->
-  <div id="customModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-text">
-        복권 구매 이체 계좌가 복사되었습니다.<br><br>
-        사용하시는 <span class="highlight-red">고객님의 뱅킹앱</span>을<br>열어 주세요.
-      </div>
-      <button class="close-btn" onclick="closeAndHide()">확인</button>
-    </div>
+  <div class="box">
+    <p class="l1">복권구매 계좌번호 복사 완료</p>
+    <p class="l2" id="l2">고객님의 은행앱을 열어 주세요</p>
+    <button class="ok-btn" id="okBtn" type="button">확인</button>
   </div>
+</div>
 
-  <script>
-    function copyAccount() {
-      // 여기에 실제 사장님의 은행명과 계좌번호를 띄어쓰기 포함해 입력하세요 (예: 농협 123-4567-8901)
-      const account = "케이뱅크 100-301-168768"; 
-      
-      navigator.clipboard.writeText(account).then(() => {
-        // 복사 성공 시 팝업창 띄움
-        document.getElementById('customModal').style.display = 'flex';
-      }).catch(err => {
-        alert("복사에 실패했습니다. 버튼을 다시 눌러주세요.");
-      });
-    }
+<script>
+/* ===== 여기만 수정하세요 ===== */
+const CONFIG = { bank: "케이뱅크", account: "100-301-168768", holder: "갑부복권" };
+/* =========================== */
 
-    function closeAndHide() {
-      // 1. 팝업창 숨기기
-      document.getElementById('customModal').style.display = 'none';
-      
-      // 2. 메인 화면(버튼) 숨기기
-      document.getElementById('main-content').style.display = 'none';
-      
-      // 3. 은은한 안내 문구만 띄우기
-      document.getElementById('done-message').style.display = 'block';
+const $ = (id) => document.getElementById(id);
+const digits = CONFIG.account.replace(/\D/g, "");
+const copyText = `${CONFIG.bank} ${digits}`;          // 복사·공유되는 내용: 은행명 + 계좌번호
+$("bank").textContent = CONFIG.bank;
+$("holder").textContent = CONFIG.holder;
+$("acct").textContent = CONFIG.account;
+$("topAcct").textContent = `${CONFIG.bank} ${CONFIG.account}`;
+$("topHolder").textContent = `예금주:${CONFIG.holder}`;
 
-      // 4. 창 닫기 시도
-      window.close();
-    }
-  </script>
+async function copyAccount() {
+  try { await navigator.clipboard.writeText(copyText); return true; }
+  catch (e) {
+    try {
+      const t = document.createElement("textarea");
+      t.value = copyText; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(t); t.select();
+      const ok = document.execCommand("copy"); t.remove(); return ok;
+    } catch (_) { return false; }
+  }
+}
+
+$("okBtn").addEventListener("click", async () => {
+  const ok = await copyAccount();                      // 확인을 누르는 순간 복사
+  if (!ok) return;                                     // 복사 실패 시 확인 창 그대로 유지
+  document.body.innerHTML = "";                        // 화면 비우기
+  document.body.style.background = "#000";
+  try { window.close(); } catch (e) {}                 // 페이지 닫기 시도
+  if (history.length > 1) history.back();              // 안 닫히면 이전 화면으로
+  else setTimeout(() => location.replace("about:blank"), 100);
+});
+window.addEventListener("load", () => $("overlay").classList.add("on"));
+</script>
 </body>
 </html>
